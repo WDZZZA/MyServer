@@ -134,8 +134,9 @@ public class DoubleWeekService {
                 } else {
                     //7.根据用户账号生成token,并将token+用户信息存入到redis(以后所有的操作，第一步先校验这个token，如果没有这个则是水平越权)
                     String token = JwtUtils.createJWT(user.getPhone(), 24 * 3600);
-                    redisTemplate.opsForValue().set("jwt"+token,user,20, TimeUnit.MINUTES);
-                    return "验证信息成功，登录成功"+token;
+                    //String token = this.getCode();
+                    redisTemplate.opsForValue().set("jwt" + token, user, 20, TimeUnit.MINUTES);
+                    return "验证信息成功，登录成功" + token;
                 }
             }
         } else {
@@ -149,21 +150,18 @@ public class DoubleWeekService {
      *
      * @return
      */
-
-    @Transactional(propagation= Propagation.REQUIRED)
-    public String doTrans(String phoneIn,String content,String token,String phoneOut ) {
+//该事务注解的最大作用就是需要两个数据同时发生改变，但当一个数据发生改变时，突发异常，无法对另一个数据进行改变的时候，那第一个数据的改变也取消，从而保证事务的一致性。
+    @Transactional(propagation = Propagation.REQUIRED)
+    public String doTrans(String phoneIn, String content, String token, String phoneOut) {
         //1.先校验是否有对应的session会话
-        if(redisTemplate.opsForValue().get("jwt"+token)==null){
-            return  "请先登录";
-        }else {
-
-accountMapper.in(content,phoneIn);
-// 抛出异常
-            int i = 1/0;
-accountMapper.out(content,phoneOut);
-            //2.先查询用户的总金额
-            //3.查询转账对象的总金额
-            //4.用户扣款，对象加钱(这一步要用到分布式锁)
+        if (redisTemplate.opsForValue().get("jwt" + token) == null) {
+            return "请先登录";
+        } else {
+            //进行收账，出账操作
+            accountMapper.in(content, phoneIn);
+            // 抛出异常(用来监测事务的一致性)
+           // int i = 1/0;
+            accountMapper.out(content, phoneOut);
             return "转账成功";
         }
     }

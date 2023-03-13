@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping(value = "/doubleWeek")
 @Api(tags = "双周分享作业")
@@ -61,7 +63,9 @@ public class DoubleWeekApi {
     @PostMapping("/pwd444")
     //用来标注请求头(因为请求体的参数可以直接在参数中表现出来)
     @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "String", paramType = "header")
-    public String doTrans(String phoneIn,String phoneOut, String content, String token) {
+    public String doTrans(String phoneIn,String phoneOut, String content, HttpServletRequest request) {
+        //获取头部的token标识
+        String token=request.getHeader("token");
         return doubleWeekService.doTrans( phoneIn, content, token, phoneOut);
     }
 }
