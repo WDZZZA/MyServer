@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -24,6 +25,8 @@ import java.net.InetSocketAddress;
 @EnableAsync
 //swagger配置启动
 @EnableSwagger2
+//过滤器webfilter注解配置的启动
+@ServletComponentScan
 public class MyServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(MyServerApplication.class, args);

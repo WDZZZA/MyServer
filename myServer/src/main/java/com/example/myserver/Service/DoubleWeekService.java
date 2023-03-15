@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,10 +34,10 @@ public class DoubleWeekService {
         ValueOperations opsForValue = redisTemplate.opsForValue();
         //2.校验两次验证码的请求是否间隔超过一分钟(防重逻辑)
         if (!redisTemplate.hasKey(codeWaitKey)) {
-            opsForValue.set(codeWaitKey, 0, 1, TimeUnit.MINUTES);
+            opsForValue.set(codeWaitKey, 0, 3, TimeUnit.SECONDS);
             //3.每个号码只能发送三次,如果这个手机号码没有缓存，则新建缓存(校验码生效时间)
             if (!redisTemplate.hasKey(phoneKey)) {
-                opsForValue.set(phoneKey, 3, 5, TimeUnit.MINUTES);
+                opsForValue.set(phoneKey, 3, 30, TimeUnit.SECONDS);
             }
             //4.当号码的次数被用完了
             if (Integer.parseInt(String.valueOf(opsForValue.get(phoneKey))) == 0) {
@@ -54,7 +53,7 @@ public class DoubleWeekService {
             opsForValue.set(codeKey, code, 2, TimeUnit.MINUTES);
             return code;
         } else {
-            return "间隔时间没有超过一分钟!!!!!";
+            return "间隔时间没有超过3s!!!!!";
         }
     }
 
@@ -90,7 +89,10 @@ public class DoubleWeekService {
             if (user.getAccount() == null) {
                 return "无该用户信息，请先注册";
             } else {
-                return "验证信息成功";
+                //生成对应的token，此后转账交易必须经过校验
+                String token = JwtUtils.createJWT(user.getPhone(), 24 * 3600);
+                redisTemplate.opsForValue().set("jwt" + token, user, 20, TimeUnit.MINUTES);
+                return "验证信息成功，登录成功" + token;
             }
         }
         return "出现其他异常情况";

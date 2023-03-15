@@ -41,7 +41,6 @@ public class LoginController {
     ProductService productService;
     @Autowired
     ProductServiceHappy productServiceHappy;
-
     @Autowired
     JwtProdce jwtProdce;
 
